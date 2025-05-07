@@ -1,5 +1,6 @@
 package com.travel.travel.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "member")
@@ -37,6 +39,10 @@ public class MemberEntity implements UserDetails {
 
     @Version
     private Integer version;
+
+    @OneToMany(mappedBy = "member")
+    @JsonIgnore
+    private List<PostsEntity> posts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

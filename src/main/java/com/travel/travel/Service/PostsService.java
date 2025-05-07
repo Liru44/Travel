@@ -1,10 +1,16 @@
 package com.travel.travel.Service;
 
+import com.travel.travel.DTO.PostsDTO;
+import com.travel.travel.Entity.LocationEntity;
+import com.travel.travel.Entity.MemberEntity;
 import com.travel.travel.Entity.PostsEntity;
+import com.travel.travel.Repository.LocationRepository;
+import com.travel.travel.Repository.MemberRepository;
 import com.travel.travel.Repository.PostsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,10 +18,39 @@ import java.util.Optional;
 public class PostsService {
     @Autowired
     private PostsRepository postsRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private LocationRepository locationRepository;
 
     // 게시글 저장
-    public PostsEntity createPost(PostsEntity posts) {
-        return postsRepository.save(posts);
+    public void newPost(PostsDTO posts, String userId) throws IOException {
+        // 1. 작성자 확인
+        MemberEntity member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다. "));
+
+        // 2. 위치 확인 또는 생성
+        double lat = posts.getLat();
+        double lng = posts.getLng();
+        String address = posts.getAddress();
+        LocationEntity location = locationRepository.findByName(address).
+                orElseGet(() -> {
+                    LocationEntity newLoc = new LocationEntity();
+                    newLoc.setLatitude(lat);
+                    newLoc.setLongitude(lng);
+                    newLoc.setName(address);
+                    return locationRepository.save(newLoc);
+                });
+
+        PostsEntity newPost = new PostsEntity();
+        newPost.setTitle(posts.getTitle());
+        newPost.setContent(posts.getContent());
+        if (posts.getMedia() != null && !posts.getMedia().isEmpty()) {
+            newPost.setMedia(posts.getMedia().getBytes());
+        }
+        newPost.setLocation(location);
+        newPost.setOriginator(member);
+
+        postsRepository.save(newPost);
     }
 
     // 게시글 전체 조회
@@ -23,7 +58,11 @@ public class PostsService {
         return postsRepository.findAll();
     }
 
-    // 특정 게시글 조회
+    public List<PostsEntity> getPostsByLatLng(Double lat, Double lng) {
+        return postsRepository.findByLocationLatitudeAndLocationLongitude(lat, lng);
+    }
+
+    // 특정 ID 게시글 조회
     public Optional<PostsEntity> getPostById(Long id) {
         return postsRepository.findById(id);
     }

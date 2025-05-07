@@ -15,9 +15,4 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocationController {
     private final LocationService locationService;
-
-    @GetMapping
-    public List<LocationEntity> getNearbyLocations(@RequestParam double lat, @RequestParam double lon) {
-        return locationService.getNearbyLocations(lat, lon);
-    }
 }
