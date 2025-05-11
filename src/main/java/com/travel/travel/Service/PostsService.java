@@ -58,13 +58,32 @@ public class PostsService {
         return postsRepository.findAll();
     }
 
-    public List<PostsEntity> getPostsByLatLng(Double lat, Double lng) {
-        return postsRepository.findByLocationLatitudeAndLocationLongitude(lat, lng);
+    // 특정 장소 게시글 조회
+    public List<PostsEntity> getPostsByLatLng(Double lat, Double lon) {
+        return postsRepository.findByLocationLatitudeAndLocationLongitude(lat, lon);
     }
 
     // 특정 ID 게시글 조회
     public Optional<PostsEntity> getPostById(Long id) {
         return postsRepository.findById(id);
+    }
+
+    // 게시글 수정
+    public void editPost(PostsDTO posts) throws IOException {
+        PostsEntity postsEntity = postsRepository.findById(posts.getId())
+                .orElseThrow(() -> new IllegalArgumentException("게시글 없음"));
+
+        try {
+            postsEntity.setTitle(posts.getTitle());
+            postsEntity.setContent(posts.getContent());
+            if (posts.getMedia() != null) {
+                postsEntity.setMedia(posts.getMedia().getBytes());
+            }
+
+            postsRepository.save(postsEntity);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // 게시글 삭제

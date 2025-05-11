@@ -8,6 +8,7 @@ import java.util.Base64;
 
 @Getter
 public class PostsResponseDTO {
+    private Long id;
     private String title;
     private String content;
     private String originator;
@@ -16,6 +17,7 @@ public class PostsResponseDTO {
     private String mediaBase64;
 
     public PostsResponseDTO(PostsEntity entity) {
+        this.id = entity.getId();
         this.title = entity.getTitle();
         this.content = entity.getContent();
         this.originator = entity.getOriginator().getUsername();  // 작성자 이름

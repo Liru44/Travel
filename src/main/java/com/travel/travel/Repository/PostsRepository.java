@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface PostsRepository extends JpaRepository<PostsEntity, Long> {
-    List<PostsEntity> findByLocationLatitudeAndLocationLongitude(Double lat, Double lng);
+    List<PostsEntity> findByLocationLatitudeAndLocationLongitude(Double lat, Double lon);
 }

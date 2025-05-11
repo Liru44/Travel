@@ -32,9 +32,9 @@ public class PostsController {
 
     // 게시글 조회 (전체 or 해당 위치)
     @GetMapping("/getPosts")
-    public List<PostsResponseDTO> getAllPosts(@RequestParam(required = false) Double lat, @RequestParam(required = false) Double lng) {
-        List<PostsEntity> posts = (lat != null && lng != null)
-                ? postService.getPostsByLatLng(lat, lng)
+    public List<PostsResponseDTO> getAllPosts(@RequestParam(required = false) Double lat, @RequestParam(required = false) Double lon) {
+        List<PostsEntity> posts = (lat != null && lon != null)
+                ? postService.getPostsByLatLng(lat, lon)
                 : postService.getAllPosts();
 
         return posts.stream()
@@ -48,6 +48,13 @@ public class PostsController {
         return postService.getPostById(id)
                 .map(post -> ResponseEntity.ok(new PostsResponseDTO(post)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // 게시글 수정
+    @PutMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> editPost(@ModelAttribute PostsDTO posts) throws IOException {
+        postService.editPost(posts);
+        return ResponseEntity.ok("게시글 수정 성공");
     }
 
     // 게시글 삭제
