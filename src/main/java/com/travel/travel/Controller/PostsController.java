@@ -31,7 +31,7 @@ public class PostsController {
     }
 
     // 게시글 조회 (전체 or 해당 위치)
-    @GetMapping("/getPosts")
+    @GetMapping("/post")
     public List<PostsResponseDTO> getAllPosts(@RequestParam(required = false) Double lat, @RequestParam(required = false) Double lon) {
         List<PostsEntity> posts = (lat != null && lon != null)
                 ? postService.getPostsByLatLng(lat, lon)
@@ -43,7 +43,7 @@ public class PostsController {
     }
 
     // 특정 ID 게시글 조회
-    @GetMapping("/getPosts/{id}")
+    @GetMapping("/post/{id}")
     public ResponseEntity<PostsResponseDTO> getPostById(@PathVariable Long id) {
         return postService.getPostById(id)
                 .map(post -> ResponseEntity.ok(new PostsResponseDTO(post)))
