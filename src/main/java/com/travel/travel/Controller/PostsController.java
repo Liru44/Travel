@@ -6,14 +6,16 @@ import com.travel.travel.Entity.PostsEntity;
 import com.travel.travel.Service.PostsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -53,6 +55,7 @@ public class PostsController {
     // 게시글 수정
     @PutMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> editPost(@ModelAttribute PostsDTO posts) throws IOException {
+        checkUser(posts.getId());
         postService.editPost(posts);
         return ResponseEntity.ok("게시글 수정 성공");
     }
@@ -60,6 +63,18 @@ public class PostsController {
     // 게시글 삭제
     @DeleteMapping("/delete/{id}")
     public void deletePost(@PathVariable Long id) {
+        checkUser(id);
         postService.deletePost(id);
+    }
+
+    //작성자와 현재 접속 유저 확인
+    public void checkUser(Long id) {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        PostsEntity post = postService.getPostById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
+
+        if (!post.getOriginator().getUsername().equals(currentUsername)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 수정/삭제할 수 있습니다.");
+        }
     }
 }
